@@ -1,0 +1,12 @@
+package com.godown.storage.dto;
+
+import com.godown.storage.entity.BookingStatus;
+import java.time.LocalDate;
+
+public record BookingResponse(
+        Long id,
+        Long unitId,
+        LocalDate startDate,
+        LocalDate endDate, BookingStatus status
+) {
+}

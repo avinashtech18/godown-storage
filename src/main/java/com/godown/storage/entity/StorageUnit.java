@@ -37,4 +37,11 @@ public class StorageUnit {
         this.monthlyBaseCapacityKg = monthlyBaseCapacityKg;
         this.status = StorageUnitStatus.AVAILABLE;
     }
+    public void markOccupied() {
+        this.status = StorageUnitStatus.OCCUPIED;
+    }
+
+    public void markAvailable() {
+        this.status = StorageUnitStatus.AVAILABLE;
+    }
 }

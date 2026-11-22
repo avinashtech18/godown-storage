@@ -47,6 +47,19 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/storage-units").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/storage-units/available")
                         .hasAnyRole("CUSTOMER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/bookings").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.GET, "/api/bookings").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/bookings/*/close").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.POST, "/api/bookings/*/items").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.GET, "/api/bookings/*/items").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.POST, "/api/bookings/*/invoices").hasRole("ADMIN")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/bookings/*/invoices",
+                                "/api/bookings/*/invoices/*"
+                        ).hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/bookings/*/invoices/*/pay")
+                        .hasRole("ADMIN")
                         .anyRequest().denyAll())
                 .oauth2ResourceServer(server -> server
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(authenticationConverter)))
