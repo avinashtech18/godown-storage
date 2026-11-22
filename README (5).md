@@ -1,0 +1,285 @@
+<div align="center">
+
+# 📦 Godown Luggage Storage Management System
+
+**A secure, role-based warehouse storage platform — reserve units, register items, and manage monthly billing.**
+
+![Java](https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+![JWT](https://img.shields.io/badge/Auth-JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
+![Maven](https://img.shields.io/badge/Build-Maven-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)
+![React](https://img.shields.io/badge/Frontend-React_(planned)-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+
+![Backend](https://img.shields.io/badge/Backend-Complete-success?style=flat-square)
+![Frontend](https://img.shields.io/badge/Frontend-Planned-lightgrey?style=flat-square)
+![Stages](https://img.shields.io/badge/Stages-6%2F6-blue?style=flat-square)
+
+[Features](#-features) · [Billing](#-billing-rules) · [Quick Start](#-quick-start) · [API](#-api-reference) · [Testing](#-build--test) · [Roadmap](#-roadmap)
+
+</div>
+
+---
+
+## 📖 About
+
+**Godown** is a warehouse storage management application.
+
+- 🧳 **Customers** reserve storage units, register the items they store, and view monthly invoices.
+- 🛠️ **Administrators** create units, generate invoices, and record payments received outside the application.
+
+Every customer can access **only their own** bookings, items, and invoices. API responses use DTOs, and validation and business errors return a consistent payload with `timestamp`, `status`, and `message`.
+
+## 🚦 Project Status
+
+| Layer | Status |
+|---|---|
+| **Backend** | ✅ All six planned stages implemented and verified locally with Postman and a pricing unit test |
+| **Frontend** | 🗓️ React + Vite customer and admin screens planned |
+
+## 🧰 Tech Stack
+
+| Area | Technology |
+|---|---|
+| **Backend** | Java 17, Spring Boot 3, Spring Web, Spring Data JPA, Jakarta Validation |
+| **Security** | Spring Security, BCrypt, JWT bearer authentication |
+| **Database** | MySQL 8 |
+| **Build & Testing** | Maven Wrapper, JUnit, Mockito, Postman |
+| **Planned Frontend** | React, Vite |
+
+## ✨ Features
+
+| Stage | What it delivers |
+|---|---|
+| **1. Project setup** | Spring Boot application, MySQL connection, environment-based configuration, and a public health endpoint |
+| **2. Users & authentication** | Customer registration, BCrypt password hashing, duplicate-email protection, request validation, JWT login, and `CUSTOMER` / `ADMIN` roles |
+| **3. Storage units** | Admin-only unit creation, unique unit codes, capacity in kilograms, and an available-units list for authenticated users |
+| **4. Bookings** | Customers reserve available units, list their own bookings, and close them. A **database lock** prevents two requests from reserving the same unit, and closing a booking releases the unit |
+| **5. Items** | Customers add items to their own active bookings and view items from their own active or closed bookings. Combined item weight is **checked against the unit's capacity** |
+| **6. Monthly invoices** | Admin-only invoice generation, one invoice per booking per month, customer-owned invoice views, automatic overdue updates, a one-time late fee, and admin payment recording |
+
+### 🔄 How It Works
+
+```mermaid
+flowchart LR
+    A[Customer registers] --> B[Admin creates storage unit]
+    B --> C[Customer reserves unit]
+    C --> D[Customer adds items]
+    D --> E[Admin generates monthly invoice]
+    E --> F{Paid within 7 days?}
+    F -- Yes --> G[Admin records payment]
+    F -- No --> H[Invoice becomes OVERDUE<br/>+ one-time ₹50 late fee]
+    H --> G
+    G --> I[Customer closes booking]
+    I --> J[Unit available again]
+```
+
+## 💰 Billing Rules
+
+Each item's monthly charge is its **size rate + ₹5 × weight in kg**.
+
+| Item size | Base rate |
+|---|---:|
+| `SMALL` | ₹100.00 |
+| `MEDIUM` | ₹250.00 |
+| `LARGE` | ₹500.00 |
+
+> 🧮 **Example:** a 12.50 kg medium suitcase costs ₹250 + (₹5 × 12.50) = **₹312.50** before late fees.
+
+- An admin can generate an invoice for the **current calendar month in India** if the booking was active for at least one day that month. Partial months use the full monthly rates.
+- The invoice uses the items present **when it is issued**. The amount is saved, and generating the same invoice again returns the existing one.
+- Payment is due **seven calendar days** after issuance. An invoice still unpaid after its due date becomes `OVERDUE` and receives a one-time **₹50** late fee.
+- An admin records payment received outside the app. Repeating the payment request preserves the original `paidAt` value.
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- ☕ JDK 17 with `JAVA_HOME` configured
+- 🐬 MySQL 8 running on port `3306`
+- 🔧 Git and PowerShell
+- 📮 Postman for manual API testing
+
+### 1. Clone the repository
+
+```powershell
+git clone https://github.com/avinashtech18/godown-storage.git
+cd godown-storage
+java -version
+.\mvnw.cmd -v
+```
+
+The JDBC URL is configured to create `godown_db` if it is missing and your MySQL account has permission. You can also create it manually:
+
+```sql
+CREATE DATABASE IF NOT EXISTS godown_db;
+```
+
+### 2. Configure the environment and start Spring Boot
+
+Run this block in PowerShell from the repository root. Enter your local MySQL password when prompted.
+
+```powershell
+$env:DB_USER = 'root'
+$password = Read-Host 'MySQL password' -AsSecureString
+$env:DB_PASSWORD = [System.Net.NetworkCredential]::new('', $password).Password
+
+if (-not $env:JWT_SECRET) {
+    $key = New-Object byte[] 32
+    $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+    $rng.GetBytes($key)
+    $rng.Dispose()
+    $env:JWT_SECRET = [Convert]::ToBase64String($key)
+}
+
+$env:SERVER_PORT = '8081'
+.\mvnw.cmd spring-boot:run
+```
+
+| Variable | Purpose |
+|---|---|
+| `DB_USER` | MySQL username. Change `root` if you use another account |
+| `DB_PASSWORD` | Password for that MySQL account |
+| `JWT_SECRET` | Base64-encoded JWT signing key that decodes to at least 32 bytes |
+| `SERVER_PORT` | HTTP port. The examples below use `8081` |
+
+If your local setup needs the Spring datasource password override, set it before starting the app:
+
+```powershell
+$env:SPRING_DATASOURCE_PASSWORD = $env:DB_PASSWORD
+```
+
+> 💡 PowerShell environment variables are scoped to the current window, so set them again in a new window. If you generate a new JWT signing key, log in again to get fresh tokens.
+
+### 3. Verify the app is running
+
+Wait for `Started GodownStorageApplication`, then in a second terminal:
+
+```powershell
+Invoke-RestMethod http://localhost:8081/api/health
+```
+
+Expected response:
+
+```json
+{"status":"UP"}
+```
+
+### 4. Set up a local admin
+
+Public registration always creates a `CUSTOMER`. For local development, register an account with the email `admin-test@example.com`, then promote it from your MySQL session:
+
+```sql
+UPDATE godown_db.users
+SET role = 'ADMIN'
+WHERE email = 'admin-test@example.com'
+  AND role = 'CUSTOMER';
+```
+
+Log in again after changing the role so the new JWT contains `ADMIN`.
+
+## 🔌 API Reference
+
+**Base URL:** `http://localhost:8081`
+
+For protected requests in Postman, choose **Authorization → Bearer Token** and paste the `accessToken` returned by login.
+
+| Method | Path | Access |
+|:---:|---|---|
+| `GET` | `/api/health` | 🌐 Public |
+| `POST` | `/api/auth/register` | 🌐 Public |
+| `POST` | `/api/auth/login` | 🌐 Public |
+| `GET` | `/api/auth/me` | 👤 Customer or admin |
+| `POST` | `/api/storage-units` | 🛡️ Admin |
+| `GET` | `/api/storage-units/available` | 👤 Customer or admin |
+| `POST` | `/api/bookings` | 👤 Customer |
+| `GET` | `/api/bookings` | 👤 Customer (own bookings) |
+| `PATCH` | `/api/bookings/{id}/close` | 👤 Booking owner |
+| `POST` | `/api/bookings/{bookingId}/items` | 👤 Owner of an active booking |
+| `GET` | `/api/bookings/{bookingId}/items` | 👤 Booking owner |
+| `POST` | `/api/bookings/{bookingId}/invoices` | 🛡️ Admin |
+| `GET` | `/api/bookings/{bookingId}/invoices` | 👤 Booking owner |
+| `GET` | `/api/bookings/{bookingId}/invoices/{invoiceId}` | 👤 Booking owner |
+| `PATCH` | `/api/bookings/{bookingId}/invoices/{invoiceId}/pay` | 🛡️ Admin |
+
+### 🧪 Example Workflow
+
+1. **Register** one customer and one local admin. Registration accepts `name`, `email`, and `password`; login accepts `email` and `password`.
+2. **As admin**, create a unit:
+   ```json
+   {"code":"UNIT-001","sizeLabel":"SMALL","monthlyBaseCapacityKg":50}
+   ```
+3. **As customer**, list available units, then create a booking (replace `1` with your unit ID):
+   ```json
+   {"unitId":1}
+   ```
+4. Use the returned **booking ID** to add an item:
+   ```json
+   {"name":"Travel suitcase","size":"MEDIUM","weightKg":12.50}
+   ```
+5. **As admin**, generate the invoice for that booking. With only the suitcase present, the amount is **₹312.50**.
+6. **As customer**, list invoices for the booking. **As admin**, record payment using the returned invoice ID.
+7. **As customer**, close the booking and confirm the unit appears in the available list again.
+
+> ℹ️ Use an **empty request body** for invoice generation, payment recording, and booking closure.
+
+## 🧪 Build & Test
+
+Run these from the repository root in PowerShell:
+
+```powershell
+# Compile backend source
+.\mvnw.cmd compile
+
+# Run the invoice pricing unit tests (no app start, no MySQL needed)
+.\mvnw.cmd "-Dtest=InvoicePriceCalculatorTest" test
+
+# Build the application, including tests
+.\mvnw.cmd clean package
+
+# Run the packaged JAR using the same environment variables
+java -jar .\target\godown-storage-0.0.1-SNAPSHOT.jar
+```
+
+> ⚠️ The full Maven test suite includes a Spring Boot context test. Keep MySQL running and the environment variables set when running `clean package`. Run either the packaged JAR or `spring-boot:run` on port `8081`.
+
+## 🗺️ Roadmap
+
+- [x] Stage 1 — Project setup and health endpoint
+- [x] Stage 2 — Users and JWT authentication
+- [x] Stage 3 — Storage units
+- [x] Stage 4 — Bookings with concurrency-safe reservation
+- [x] Stage 5 — Items with capacity checks
+- [x] Stage 6 — Monthly invoices, late fees, and payment recording
+- [ ] React + Vite frontend (customer and admin screens)
+
+### ⚛️ Planned React Frontend
+
+The `frontend/` directory will hold the React app. Create it once when starting the frontend stage, using a Node.js version supported by Vite:
+
+```powershell
+npm create vite@latest frontend -- --template react
+cd frontend
+npm install
+npm run dev
+```
+
+Configure Vite to proxy `/api` to `http://localhost:8081` and use relative `/api/...` URLs in React. Run the frontend and backend in separate terminals. Once implemented, use these from `frontend/`:
+
+```powershell
+npm run dev       # start the dev server
+npm run build     # production build
+npm run preview   # preview the production build
+```
+
+## 👨‍💻 Author
+
+**Avinash A** — [@avinashtech18](https://github.com/avinashtech18)
+
+---
+
+<div align="center">
+
+⭐ If you find this project useful, consider giving it a star!
+
+</div>
