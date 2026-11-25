@@ -1,0 +1,117 @@
+/* Layout, cards and tokens now live in index.css. This file: customer nav + rates page. */
+
+.customer-dashboard {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(1rem, 3vw, 1.75rem);
+  min-width: 0;
+}
+
+.customer-navigation {
+  display: grid;
+  gap: .3rem;
+  position: sticky;
+  top: 1rem;
+  padding: .7rem;
+  border-radius: .9rem;
+  background: var(--ink);
+  box-shadow: 0 14px 34px -22px #16202a;
+}
+
+.customer-navigation a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: .6rem .9rem;
+  border-left: 4px solid transparent;
+  border-radius: .45rem;
+  color: #d5dde6;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background .15s, color .15s;
+}
+.customer-navigation a:hover { background: var(--ink-2); color: #fff; }
+.customer-navigation a[aria-current="page"] {
+  border-left-color: var(--amber);
+  background: #ffffff1a;
+  color: #fff;
+}
+.customer-navigation a:focus-visible { outline-color: var(--amber); }
+
+/* ----- Rates ----- */
+.rates-header {
+  position: relative;
+  margin-bottom: 1.25rem;
+  padding: clamp(1.1rem, 3vw, 1.75rem);
+  padding-bottom: calc(clamp(1.1rem, 3vw, 1.75rem) + 8px);
+  overflow: hidden;
+  border-radius: .7rem;
+  background: var(--ink);
+  color: #fff;
+}
+.rates-header::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 8px;
+  background: repeating-linear-gradient(-45deg, var(--amber) 0 10px, var(--ink) 10px 20px);
+}
+.rates-header h2 { margin: 0; font-size: clamp(1.4rem, 3vw, 2rem); }
+.rates-header p { margin: .5rem 0 0; color: #cdd6e0; }
+
+.rate-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.rate-card {
+  min-width: 0;
+  padding: 1.1rem;
+  border: 1px solid var(--line);
+  border-top: 5px solid var(--rate-color);
+  border-radius: .7rem;
+  background: var(--rate-background);
+}
+.rate-card--small  { --rate-color: #1d6b62; --rate-background: #eaf3f0; }
+.rate-card--medium { --rate-color: #b8823c; --rate-background: #f9f0e0; }
+.rate-card--large  { --rate-color: #26364a; --rate-background: #eceeF2; }
+
+.rate-card h3 { margin: 0; font-size: 1.1rem; }
+
+.rate-price {
+  margin: .45rem 0 1rem;
+  color: var(--rate-color);
+  font: 800 clamp(1.8rem, 3vw, 2.4rem)/1.1 var(--display);
+}
+.rate-price span { font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: .85rem; font-weight: 500; color: var(--muted); }
+
+.rate-card dl {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.rate-card dt { margin-top: .7rem; padding: 0; border: 0; font-size: .85rem; }
+.rate-card dd { margin: .15rem 0 0; padding: 0; border: 0; text-align: left; }
+
+.rate-note {
+  margin: 1.25rem 0 0;
+  padding: .9rem 1rem;
+  border-left: 4px solid var(--kraft);
+  border-radius: .4rem;
+  background: var(--paper);
+  color: var(--ink-2);
+}
+
+@media (max-width: 1050px) {
+  .rate-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 185px), 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .customer-dashboard { grid-template-columns: minmax(0, 1fr); }
+  .customer-navigation { position: static; display: flex; flex-wrap: wrap; }
+  .customer-navigation a { flex: 1 1 auto; }
+}

@@ -1,0 +1,100 @@
+.dashboard-card > .warehouse-map {
+  grid-column: 1 / -1;
+  background: var(--paper);
+}
+
+.warehouse-map-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+.warehouse-map-header h2,
+.warehouse-map-header p { margin: 0; }
+.warehouse-map-header p { margin-top: .35rem; color: var(--muted); }
+
+.warehouse-demo-label {
+  padding: .3rem .7rem;
+  border: 1.5px dashed var(--kraft);
+  border-radius: 999px;
+  color: #7a5220;
+  font-size: .8rem;
+  font-weight: 600;
+}
+
+/* floor plan */
+.warehouse-floor {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .75rem;
+  padding: .9rem;
+  border: 2px dashed #a79f8c;
+  border-radius: .8rem;
+  background:
+    repeating-linear-gradient(45deg, #16202a08 0 8px, transparent 8px 16px),
+    #e7e4dc;
+}
+
+.warehouse-floor .warehouse-bay {
+  min-height: 84px;
+  padding: .8rem 1rem;
+  border: 1.5px solid var(--line);
+  border-left: 6px solid var(--kraft);
+  background: #fff;
+  color: var(--ink);
+  font: 700 1rem var(--display);
+  text-align: left;
+}
+.warehouse-floor .warehouse-bay:nth-child(1),
+.warehouse-floor .warehouse-bay:nth-child(4) { border-left-color: var(--teal); }
+
+.warehouse-floor .warehouse-bay:hover { border-color: var(--ink); background: #fff; }
+.warehouse-floor .warehouse-bay[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+
+.warehouse-demo-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
+
+/* conveyor lane */
+.warehouse-track {
+  position: relative;
+  height: 48px;
+  margin-top: 1rem;
+  border-radius: .5rem;
+  background:
+    repeating-linear-gradient(90deg, #ffffff22 0 2px, transparent 2px 22px),
+    var(--ink-2);
+}
+
+.warehouse-package {
+  position: absolute;
+  top: 7px;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 34px;
+  border-radius: .3rem;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 4px), #f3dcb866 calc(50% - 4px) calc(50% + 4px), transparent calc(50% + 4px)),
+    var(--kraft);
+  color: #2a1a06;
+  font-size: .7rem;
+  font-weight: 800;
+  animation: warehouse-move 1s ease-out both;
+}
+
+.warehouse-package--arrival { --from: 4px; --to: calc(50% - 26px); }
+.warehouse-package--pickup  { --from: calc(50% - 26px); --to: calc(100% - 56px); }
+
+@keyframes warehouse-move {
+  from { left: var(--from); }
+  to   { left: var(--to); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .warehouse-package { left: var(--to); animation: none; }
+}
