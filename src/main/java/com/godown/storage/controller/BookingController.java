@@ -9,6 +9,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import com.godown.storage.dto.ScheduleBookingRequest;
+
 @RestController
 @RequestMapping("/api/bookings")
 public class BookingController {
@@ -37,5 +39,12 @@ public class BookingController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable("id") Long bookingId) {
         return bookings.closeOwnBooking(Long.valueOf(jwt.getSubject()), bookingId);
+    }
+    @PatchMapping("/{id}/schedule")
+    public BookingResponse schedule(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable("id") Long bookingId,
+            @Valid @RequestBody ScheduleBookingRequest request) {
+        return bookings.schedule(Long.valueOf(jwt.getSubject()), bookingId, request);
     }
 }

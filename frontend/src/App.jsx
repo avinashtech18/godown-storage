@@ -3,6 +3,7 @@ import CustomerDashboard from './CustomerDashboard.jsx'
 import AdminStorageUnits from './AdminStorageUnits.jsx'
 import AdminInvoices from './AdminInvoices.jsx'
 import WarehouseMap from './WarehouseMap.jsx'
+import PasswordField from './PasswordField.jsx'
 
 async function requestJson(path, options) {
   const response = await fetch(path, options)
@@ -169,18 +170,15 @@ export default function App() {
               />
             </label>
 
-            <label>
-              Password
-              <input
-                name="password"
-                type="password"
-                autoComplete={registering ? 'new-password' : 'current-password'}
-                aria-describedby={registering ? 'password-help' : undefined}
-                minLength={registering ? 8 : undefined}
-                maxLength={registering ? 72 : undefined}
-                required
-              />
-            </label>
+            <PasswordField
+              label="Password"
+              name="password"
+              autoComplete={registering ? 'new-password' : 'current-password'}
+              aria-describedby={registering ? 'password-help' : undefined}
+              minLength={registering ? 8 : undefined}
+              maxLength={registering ? 72 : undefined}
+              required
+            />
 
             {registering && (
               <>
@@ -189,16 +187,13 @@ export default function App() {
                   Some characters use more than one byte.
                 </p>
 
-                <label>
-                  Confirm password
-                  <input
-                    name="confirmPassword"
-                    type="password"
-                    autoComplete="new-password"
-                    maxLength={72}
-                    required
-                  />
-                </label>
+                <PasswordField
+                  label="Confirm password"
+                  name="confirmPassword"
+                  autoComplete="new-password"
+                  maxLength={72}
+                  required
+                />
               </>
             )}
 

@@ -60,6 +60,8 @@ public class SecurityConfig {
                         ).hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.PATCH, "/api/bookings/*/invoices/*/pay")
                         .hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/bookings/*/schedule")
+                        .hasRole("CUSTOMER")
                         .anyRequest().denyAll())
                 .oauth2ResourceServer(server -> server
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(authenticationConverter)))

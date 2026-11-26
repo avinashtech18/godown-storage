@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import AvailableUnits from './AvailableUnits.jsx'
 import MyBookings from './MyBookings.jsx'
 import './CustomerDashboard.css'
+import RateEstimator from './RateEstimator.jsx'
 
 const pages = [
   { id: 'units', label: 'Available units' },
@@ -90,7 +91,7 @@ export default function CustomerDashboard({ accessToken, requestJson }) {
               </article>
             ))}
           </div>
-
+           <RateEstimator />
           <p className="rate-note">
             Your unit’s listed capacity is the maximum combined weight of all packages
             in the booking. A 12.50 kg package registered as Medium costs{' '}

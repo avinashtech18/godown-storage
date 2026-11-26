@@ -1,7 +1,9 @@
 package com.godown.storage.service;
 
 import com.godown.storage.dto.BookingResponse;
+import com.godown.storage.dto.ScheduleBookingRequest;
 import com.godown.storage.entity.Booking;
+import com.godown.storage.entity.BookingStatus;
 import com.godown.storage.entity.StorageUnit;
 import com.godown.storage.entity.StorageUnitStatus;
 import com.godown.storage.entity.User;
@@ -12,8 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import com.godown.storage.entity.BookingStatus;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
@@ -41,7 +44,7 @@ public class BookingService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.UNAUTHORIZED, "Customer account no longer exists"));
 
-        // Hold the row lock through commit so another request sees the updated status.
+        // Hold the unit lock through commit so concurrent requests see the updated status.
         StorageUnit unit = units.findByIdForUpdate(unitId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Storage unit not found"));
@@ -51,7 +54,6 @@ public class BookingService {
                     HttpStatus.CONFLICT, "Storage unit is already occupied");
         }
 
-        // JPA saves the unit status change in the same transaction as the booking.
         unit.markOccupied();
         Booking booking = bookings.save(
                 new Booking(customer, unit, LocalDate.now(WAREHOUSE_ZONE)));
@@ -67,17 +69,9 @@ public class BookingService {
                 .toList();
     }
 
-    private BookingResponse toResponse(Booking booking) {
-        return new BookingResponse(
-                booking.getId(),
-                booking.getUnit().getId(),
-                booking.getStartDate(),
-                booking.getEndDate(),
-                booking.getStatus());
-    }
     @Transactional
     public BookingResponse closeOwnBooking(Long customerId, Long bookingId) {
-        // Lock the booking so concurrent close requests cannot release the unit twice.
+        // Lock the booking so a repeated close cannot release the unit twice.
         Booking booking = bookings.findOwnBookingForUpdate(bookingId, customerId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Booking not found"));
@@ -94,5 +88,44 @@ public class BookingService {
         unit.markAvailable();
 
         return toResponse(booking);
+    }
+
+    @Transactional
+    public BookingResponse schedule(
+            Long customerId, Long bookingId, ScheduleBookingRequest request) {
+        // Use the same lock as closure so these changes run one at a time.
+        Booking booking = bookings.findOwnBookingForUpdate(bookingId, customerId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Booking not found"));
+
+        if (booking.getStatus() != BookingStatus.ACTIVE) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Only active bookings can be scheduled");
+        }
+
+        LocalDateTime now = LocalDateTime.now(WAREHOUSE_ZONE);
+        if (!request.dropOffAt().isAfter(now)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Drop-off must be in the future");
+        }
+
+        if (!request.pickupAt().isAfter(request.dropOffAt())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Pickup must be after drop-off");
+        }
+
+        booking.scheduleHandover(request.dropOffAt(), request.pickupAt());
+        return toResponse(booking);
+    }
+
+    private BookingResponse toResponse(Booking booking) {
+        return new BookingResponse(
+                booking.getId(),
+                booking.getUnit().getId(),
+                booking.getStartDate(),
+                booking.getEndDate(),
+                booking.getStatus(),
+                booking.getScheduledDropOffAt(),
+                booking.getScheduledPickupAt());
     }
 }

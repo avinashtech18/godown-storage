@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 
 import java.time.LocalDate;
 
@@ -46,5 +47,16 @@ public class Booking {
     public void close(LocalDate endDate) {
         this.endDate = endDate;
         this.status = BookingStatus.CLOSED;
+    }
+
+    @Column(name = "scheduled_drop_off_at")
+    private LocalDateTime scheduledDropOffAt;
+
+    @Column(name = "scheduled_pickup_at")
+    private LocalDateTime scheduledPickupAt;
+
+    public void scheduleHandover(LocalDateTime dropOffAt, LocalDateTime pickupAt) {
+        this.scheduledDropOffAt = dropOffAt;
+        this.scheduledPickupAt = pickupAt;
     }
 }

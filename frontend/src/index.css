@@ -269,3 +269,25 @@ p[role="status"] {
   .dashboard-card > .brand { grid-column: 1; }
   .dashboard-card > .sign-out-button { grid-row: auto; grid-column: 1; justify-self: stretch; }
 }
+
+.auth-card .password-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  column-gap: .65rem;
+}
+
+.auth-card .password-field input {
+  padding-right: .85rem;
+}
+
+.auth-card .password-toggle {
+  position: static;
+  width: auto;
+  min-width: 4rem;
+  min-height: 46px;
+  padding: .5rem .65rem;
+  border: 1px solid #b7c8ef;
+  background: #f5f7ff;
+  color: #244fb8;
+}

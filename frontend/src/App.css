@@ -182,3 +182,28 @@
     border-right-color: var(--border);
   }
 }
+.auth-card .password-field {
+  position: relative;
+  min-width: 0;
+}
+
+.auth-card .password-field input {
+  padding-right: 5rem;
+}
+
+.auth-card .password-toggle {
+  position: absolute;
+  right: .25rem;
+  bottom: 0;
+  width: auto;
+  min-height: 44px;
+  padding: 0 .65rem;
+  border: 0;
+  background: transparent;
+  color: #244fb8;
+  font-size: .85rem;
+}
+
+.auth-card .password-toggle:hover:not(:disabled) {
+  background: #e9efff;
+}
